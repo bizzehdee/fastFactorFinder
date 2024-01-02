@@ -1,40 +1,29 @@
-#include <iostream>
-#include <chrono>
-#include <vector>
-#include <map>
 #include <boost/multiprecision/integer.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/thread.hpp>
+#include <chrono>
+#include <iostream>
+#include <map>
+#include <vector>
 
 using namespace boost::multiprecision;
 using boost::thread;
 using boost::mutex;
 
+void worker();
+uint128_t nextNumber();
+
 std::map<uint128_t, uint128_t> factorMap;
 uint128_t currentNumber = 0;
+mutex factorMapLock, numberLock;
+
 uint128_t maxNumber = 50000000;
-
 int threadCount = std::thread::hardware_concurrency();
-bool showOutput = false;
-mutex a;
+bool showOutput = true;
 
-void worker();
-static uint128_t nextNumber()
+int main(int argc, char** argv)
 {
-	uint128_t returnNumber = 0;
-
-	a.lock();
-	currentNumber++;
-	returnNumber = currentNumber;
-	a.unlock();
-
-	if (returnNumber >= maxNumber) returnNumber = 0;
-
-	return returnNumber;
-}
-
-int main(int argc, char **argv)
-{
-	for (int x = 0; x < argc; x++) 
+	for (int x = 0; x < argc; x++)
 	{
 		if (std::strcmp(argv[x], "--help") == 0)
 		{
@@ -67,7 +56,7 @@ int main(int argc, char **argv)
 	std::cout << "Max Search Number: " << maxNumber << std::endl;
 	std::cout << std::endl;
 
-	thread** threads = new thread*[threadCount];
+	thread** threads = new thread * [threadCount];
 
 	for (int i = 0; i < threadCount; i++)
 	{
@@ -91,18 +80,19 @@ int main(int argc, char **argv)
 	}
 }
 
-void worker() 
+void worker()
 {
 	std::map<uint128_t, uint128_t> localFactorMap;
 
 	uint128_t i = -1;
-	do {
+	do 
+	{
 		i = nextNumber();
 
-		uint128_t factorCount = 0;
-		uint128_t sqrti = sqrt(i);
+		uint128_t factorCount = 1;
+		uint128_t max_search = (i/2)+1;
 
-		for (uint128_t y = 1; y <= sqrti; y++)
+		for (uint128_t y = 1; y <= max_search; y++)
 		{
 			if (i % y == 0)
 			{
@@ -118,8 +108,7 @@ void worker()
 		localFactorMap[factorCount]++;
 	} while (i != 0);
 
-
-	a.lock();
+	factorMapLock.lock();
 
 	for (std::map<uint128_t, uint128_t>::iterator it = localFactorMap.begin(); it != localFactorMap.end(); ++it)
 	{
@@ -131,5 +120,22 @@ void worker()
 		factorMap[it->first] += it->second;
 	}
 
-	a.unlock();
+	factorMapLock.unlock();
+}
+
+uint128_t nextNumber()
+{
+	uint128_t returnNumber = 0;
+
+	numberLock.lock();
+	currentNumber++;
+	returnNumber = currentNumber;
+	numberLock.unlock();
+
+	if (returnNumber >= maxNumber)
+	{
+		returnNumber = 0;
+	}
+
+	return returnNumber;
 }
