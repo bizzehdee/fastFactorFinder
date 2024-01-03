@@ -18,7 +18,7 @@ uint128_t currentNumber = 0;
 mutex factorMapLock, numberLock;
 
 uint128_t maxNumber = 50000000;
-int threadCount = std::thread::hardware_concurrency();
+unsigned int threadCount = std::thread::hardware_concurrency();
 bool showOutput = true;
 
 int main(int argc, char** argv)
@@ -36,11 +36,19 @@ int main(int argc, char** argv)
 		{
 			x++;
 			threadCount = atoi(argv[x]);
+			if (threadCount == 0) 
+			{
+				threadCount = std::thread::hardware_concurrency();
+			}
 		}
 		else if (std::strcmp(argv[x], "--max") == 0)
 		{
 			x++;
 			maxNumber = uint128_t(argv[x]);
+			if (maxNumber < 4)
+			{
+				maxNumber = 4;
+			}
 		}
 		else if (std::strcmp(argv[x], "--show-output") == 0)
 		{
