@@ -89,8 +89,8 @@ void worker()
 	{
 		i = nextNumber();
 
-		uint128_t factorCount = 1;
-		uint128_t max_search = (i/2)+1;
+		uint128_t factorCount = i < 4 ? 0 : 1;
+		uint128_t max_search = i < 4 ? i : uint128_t(ceil(cpp_bin_float_quad(i) / 2));
 
 		for (uint128_t y = 1; y <= max_search; y++)
 		{
@@ -100,7 +100,7 @@ void worker()
 			}
 		}
 
-		if (localFactorMap.count(factorCount) == 0)
+		if (localFactorMap.find(factorCount) == localFactorMap.end())
 		{
 			localFactorMap.insert(std::make_pair(uint128_t(factorCount), uint128_t(0)));
 		}
@@ -112,7 +112,12 @@ void worker()
 
 	for (std::map<uint128_t, uint128_t>::iterator it = localFactorMap.begin(); it != localFactorMap.end(); ++it)
 	{
-		if (factorMap.count(it->first) == 0)
+		if (it->first == 0)
+		{
+			continue;
+		}
+
+		if (factorMap.find(it->first) == factorMap.end())
 		{
 			factorMap.insert(std::make_pair(uint128_t(it->first), uint128_t(0)));
 		}
