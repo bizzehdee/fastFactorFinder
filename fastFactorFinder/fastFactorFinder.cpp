@@ -66,12 +66,12 @@ int main(int argc, char** argv)
 
 	thread** threads = new thread * [threadCount];
 
-	for (int i = 0; i < threadCount; i++)
+	for (unsigned int i = 0; i < threadCount; i++)
 	{
 		threads[i] = new thread(worker);
 	}
 
-	for (int i = 0; i < threadCount; i++)
+	for (unsigned int i = 0; i < threadCount; i++)
 	{
 		threads[i]->join();
 		delete threads[i];
@@ -92,19 +92,22 @@ void worker()
 {
 	std::map<uint128_t, uint128_t> localFactorMap;
 
-	uint128_t i = -1;
+	uint128_t i = nextNumber();
 	do 
 	{
-		i = nextNumber();
+		uint128_t factorCount = 1;
+		uint128_t currentFactor = 2;
 
-		uint128_t factorCount = i < 4 ? 0 : 1;
-		uint128_t max_search = i < 4 ? i : uint128_t(ceil(cpp_bin_float_quad(i) / 2));
-
-		for (uint128_t y = 1; y <= max_search; y++)
+		while (i > 1)
 		{
-			if (i % y == 0)
+			if (i % currentFactor == 0)
 			{
 				factorCount++;
+				i /= currentFactor;
+			}
+			else
+			{
+				currentFactor += 1;
 			}
 		}
 
@@ -114,6 +117,7 @@ void worker()
 		}
 
 		localFactorMap[factorCount]++;
+		i = nextNumber();
 	} while (i != 0);
 
 	factorMapLock.lock();
