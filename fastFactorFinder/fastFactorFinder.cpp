@@ -95,10 +95,17 @@ void worker()
 	uint128_t i = nextNumber();
 	do 
 	{
-		uint128_t factorCount = 1;
+		uint128_t factorCount = 2; // 1 and its self
 		uint128_t currentFactor = 2;
 
-		while (i > 1)
+		while (i % currentFactor == 0)
+		{
+			factorCount++;
+			i /= currentFactor;
+		}
+
+		currentFactor = 3;
+		while (currentFactor * currentFactor <= i)
 		{
 			if (i % currentFactor == 0)
 			{
@@ -107,7 +114,7 @@ void worker()
 			}
 			else
 			{
-				currentFactor += 1;
+				currentFactor += 2;
 			}
 		}
 
