@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /fastFactorFinder/fastFactorFinder.vcxproj.filters
+/fastFactorFinder/fastFactorFinder
