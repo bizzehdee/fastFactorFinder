@@ -1,10 +1,21 @@
-#include <boost/multiprecision/integer.hpp>
-#include <boost/multiprecision/cpp_bin_float.hpp>
-#include <boost/thread.hpp>
 #include <chrono>
 #include <iostream>
 #include <map>
 #include <vector>
+#include <thread>
+
+#include <boost/multiprecision/integer.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
+#include <boost/thread.hpp>
+
+#ifdef __linux__
+#include <unistd.h>
+#elif _WIN32
+#include <windows.h>
+#else
+#errorr "Not for you"
+#endif
+
 
 using namespace boost::multiprecision;
 using boost::thread;
@@ -12,6 +23,7 @@ using boost::mutex;
 
 void worker();
 uint128_t nextNumber();
+unsigned long long getTotalSystemMemory();
 
 std::map<uint128_t, uint128_t> factorMap;
 uint128_t currentNumber = 0;
@@ -60,6 +72,8 @@ int main(int argc, char** argv)
 	std::cout << "==============" << std::endl;
 	std::cout << std::endl;
 
+
+	std::cout << "Total RAM: " << (getTotalSystemMemory() / 1024 / 1024) << "mb" << std::endl;
 	std::cout << "Number of workers: " << threadCount << std::endl;
 	std::cout << "Max Search Number: " << maxNumber << std::endl;
 	std::cout << std::endl;
@@ -162,4 +176,20 @@ uint128_t nextNumber()
 	}
 
 	return returnNumber;
+}
+
+unsigned long long getTotalSystemMemory()
+{
+#ifdef __linux__
+	long pages = sysconf(_SC_PHYS_PAGES);
+	long page_size = sysconf(_SC_PAGE_SIZE);
+	return pages * page_size;
+#elif _WIN32
+	MEMORYSTATUSEX status;
+	status.dwLength = sizeof(status);
+	GlobalMemoryStatusEx(&status);
+	return status.ullTotalPhys;
+#else
+	#errorr "Not for you"
+#endif
 }
