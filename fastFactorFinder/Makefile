@@ -1,6 +1,6 @@
 IDIR = .
 CC=g++
-CFLAGS=-I$(IDIR) -std=c++11 -I. -Wall -Ofast
+CFLAGS=-I$(IDIR) -std=c++11 -Wall -Ofast
 
 ODIR=obj
 LDIR = .
