@@ -31,7 +31,7 @@ mutex factorMapLock, numberLock;
 
 uint128_t maxNumber = 50000000;
 unsigned int threadCount = std::thread::hardware_concurrency();
-bool showOutput = true;
+bool showOutput = false;
 
 int main(int argc, char** argv)
 {
@@ -141,7 +141,6 @@ void worker()
 		i = nextNumber();
 	} while (i != 0);
 
-	factorMapLock.lock();
 
 	for (std::map<uint128_t, uint128_t>::iterator it = localFactorMap.begin(); it != localFactorMap.end(); ++it)
 	{
@@ -150,15 +149,18 @@ void worker()
 			continue;
 		}
 
+		factorMapLock.lock();
+
 		if (factorMap.find(it->first) == factorMap.end())
 		{
 			factorMap.insert(std::make_pair(uint128_t(it->first), uint128_t(0)));
 		}
 
 		factorMap[it->first] += it->second;
+
+		factorMapLock.unlock();
 	}
 
-	factorMapLock.unlock();
 }
 
 uint128_t nextNumber()
